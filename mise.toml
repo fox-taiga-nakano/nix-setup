@@ -1,0 +1,43 @@
+[tasks."dotfiles:diff"]
+description = "chezmoiの差分を表示する"
+run = "chezmoi diff"
+
+[tasks."dotfiles:apply"]
+description = "chezmoi管理ファイルを反映する"
+run = "chezmoi apply"
+
+[tasks."nix:check"]
+description = "Nix Flakeを検査する"
+dir = "{{config_root}}/nix"
+run = "nix flake check"
+
+[tasks."nix:build"]
+description = "NixOS-WSL構成を構築する"
+dir = "{{config_root}}/nix"
+run = "sudo nixos-rebuild build --flake .#wsl"
+raw = true
+
+[tasks."nix:switch"]
+description = "NixOS-WSL構成を反映する"
+dir = "{{config_root}}/nix"
+run = "sudo nixos-rebuild switch --flake .#wsl"
+raw = true
+
+[tasks."nix:update"]
+description = "Flake入力を更新する"
+dir = "{{config_root}}/nix"
+run = "nix flake update"
+
+[tasks."apply:wsl"]
+description = "dotfilesとNixOS-WSL構成を順番に反映する"
+raw = true
+run = [
+  "chezmoi apply",
+  "nix flake check ./nix",
+  "sudo nixos-rebuild switch --flake ./nix#wsl",
+]
+
+[tasks."apply:windows"]
+description = "Windowsのdotfilesを反映する"
+run = "echo 'This task is for Windows.' >&2; exit 1"
+run_windows = "chezmoi apply"

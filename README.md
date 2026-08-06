@@ -1,51 +1,92 @@
 # nix-setup
 
-Windows + NixOS on WSL の初期セットアップを補助するためのスクリプト集です。
-
-- `download-nixos-wsl.sh`: `nix-community/NixOS-WSL` の最新 `nixos.wsl` をダウンロード
-- `install-windows-apps.ps1`: `winget` でよく使う Windows アプリを一括インストール
+NixOS-WSL / Home Manager / chezmoi(Windows・WSL共通dotfiles) / 初期セットアップスクリプトを1つのGitリポジトリで管理します。
 
 ## ディレクトリ構成
 
 ```text
-.
-├─ download-nixos-wsl.sh
-├─ install-windows-apps.ps1
-└─ assets/
-   └─ nixos.wsl
+~/projects/nix-setup/
+├── .chezmoiroot
+├── .gitignore
+├── README.md
+├── mise.toml
+│
+├── bootstrap/
+│   ├── windows/
+│   │   └── install-windows-apps.ps1
+│   └── wsl/
+│       └── download-nixos-wsl.sh
+│
+├── assets/
+│   └── .gitignore
+│
+├── nix/
+│   ├── flake.nix
+│   ├── flake.lock
+│   ├── hosts/
+│   │   └── wsl/
+│   │       └── configuration.nix
+│   ├── home/
+│   │   └── taiga/
+│   │       └── home.nix
+│   └── modules/
+│       ├── nixos/
+│       └── home-manager/
+│
+└── chezmoi/
+    ├── .chezmoi.toml.tmpl
+    ├── .chezmoiignore
+    ├── .chezmoiscripts/
+    ├── dot_gitconfig.tmpl
+    ├── Documents/
+    │   └── PowerShell/
+    │       └── Microsoft.PowerShell_profile.ps1.tmpl
+    ├── AppData/
+    │   ├── Roaming/
+    │   │   └── Code/
+    │   │       └── User/
+    │   │           └── settings.json
+    │   └── Local/
+    │       └── Packages/
+    │           └── Microsoft.WindowsTerminal_8wekyb3d8bbwe/
+    │               └── LocalState/
+    │                   └── settings.json
+    └── dot_config/
+        └── wezterm/
+            └── wezterm.lua.tmpl
 ```
 
-## 前提条件
+## 管理範囲
 
-### 共通
+| 対象                                        | 管理元              |
+| ------------------------------------------- | -------------------- |
+| NixOSサービス・ユーザー・システムパッケージ | `configuration.nix`  |
+| WSLのユーザーパッケージ・Zsh・mise          | Home Manager         |
+| Windows PowerShell設定                      | chezmoi              |
+| Windows Terminal設定                        | chezmoi              |
+| Windows VS Code設定                         | chezmoi              |
+| Windowsアプリ                               | wingetスクリプト     |
+| NixOS-WSLの導入                             | bootstrapスクリプト  |
+| 操作コマンド                                | miseタスク           |
 
-- インターネット接続
+同じファイルをHome Managerとchezmoiの双方で管理しないこと（`.chezmoiignore`でOSごとに切り替える）。
 
-### `download-nixos-wsl.sh`
+## `.chezmoiroot`
 
-- Bash 実行環境（Git Bash / WSL など）
-- `curl` または `wget`
-
-### `install-windows-apps.ps1`
-
-- Windows 10/11
-- `winget` が利用可能であること
-- PowerShell
+リポジトリ直下の `.chezmoiroot` に `chezmoi` と書くことで、chezmoiのsource stateを `chezmoi/` サブディレクトリに限定しています。これにより `nix/` や `bootstrap/` がホームディレクトリへ反映されることはありません。
 
 ## 使い方
 
-## 1. NixOS-WSL イメージをダウンロード
-
-プロジェクトルートで実行:
+### 1. NixOS-WSL イメージをダウンロード
 
 ```bash
-./download-nixos-wsl.sh
+./bootstrap/wsl/download-nixos-wsl.sh
 ```
 
 別ディレクトリに保存したい場合:
 
 ```bash
-./download-nixos-wsl.sh /path/to/output-dir
+./bootstrap/wsl/download-nixos-wsl.sh /path/to/output-dir
 ```
 
 実行後、`assets/nixos.wsl`（または指定先）に保存されます。
@@ -56,31 +97,38 @@ PowerShell からインストールする例:
 wsl --install --from-file ".\assets\nixos.wsl"
 ```
 
-## 2. Windows アプリを一括インストール
+### 2. Windows アプリを一括インストール
 
 PowerShell で実行:
 
 ```powershell
-./install-windows-apps.ps1
+./bootstrap/windows/install-windows-apps.ps1
 ```
 
-スクリプト内の `winget` ID:
+### 3. chezmoi をセットアップ(WSL / Windows 共通)
 
-- `Google.Chrome`
-- `Figma.Figma`
-- `SlackTechnologies.Slack`
-- `Raycast.Raycast`
-- `AutoHotkey.AutoHotkey`
-- `Docker.DockerDesktop`
-- `Microsoft.VisualStudioCode`
-- `Postman.Postman`
-- `Microsoft.PowerToys`
-- `Git.Git`
-- `Logitech.GHUB`
-- `Microsoft.VCRedist.2015+.x64`
+```bash
+cd ~/projects/nix-setup
+chezmoi init --source "$PWD"
+chezmoi doctor
+```
 
-## 補足
+### 4. NixOS-WSL構成・dotfilesを反映(WSL)
 
-- 既にインストール済みのアプリは `winget` 側の判定によりスキップまたは失敗として表示される場合があります。
-- 必要に応じて `install-windows-apps.ps1` 内のアプリ一覧を編集してください。
-- 実行ポリシーの設定によっては、PowerShell 実行前にポリシー変更が必要な場合があります。
+```bash
+mise run dotfiles:diff
+mise run apply:wsl
+```
+
+### 5. dotfilesを反映(Windows)
+
+```powershell
+mise run apply:windows
+```
+
+## miseタスク一覧
+
+- `dotfiles:diff` / `dotfiles:apply`: chezmoiの差分表示・反映
+- `nix:check` / `nix:build` / `nix:switch` / `nix:update`: Nix Flakeの検査・構築・反映・更新
+- `apply:wsl`: chezmoi反映 → flake検査 → NixOS-WSL反映を順番に実行
+- `apply:windows`: Windows側のdotfilesを反映

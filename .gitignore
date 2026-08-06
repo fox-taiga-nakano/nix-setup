@@ -1,0 +1,4 @@
+nix/flake.lock.bak
+.direnv/
+result
+result-*
