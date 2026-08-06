@@ -1,0 +1,8 @@
+{{ if eq .chezmoi.os "linux" }}
+.gitconfig
+{{ end }}
+
+{{ if ne .chezmoi.os "windows" }}
+AppData/**
+Documents/PowerShell/**
+{{ end }}
