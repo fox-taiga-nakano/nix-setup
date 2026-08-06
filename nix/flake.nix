@@ -18,7 +18,7 @@
   outputs = { self, nixpkgs, nixos-wsl, home-manager, ... }:
     let
       system = "x86_64-linux";
-      userName = "taiga";
+      userName = "nixos";
     in
     {
       nixosConfigurations.wsl = nixpkgs.lib.nixosSystem {

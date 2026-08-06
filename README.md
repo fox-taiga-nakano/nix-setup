@@ -27,7 +27,7 @@ NixOS-WSL / Home Manager / chezmoi(Windows・WSL共通dotfiles) / 初期セッ�
 │   │   └── wsl/
 │   │       └── configuration.nix
 │   ├── home/
-│   │   └── taiga/
+│   │   └── nixos/
 │   │       └── home.nix
 │   └── modules/
 │       ├── nixos/
@@ -59,15 +59,15 @@ NixOS-WSL / Home Manager / chezmoi(Windows・WSL共通dotfiles) / 初期セッ�
 ## 管理範囲
 
 | 対象                                        | 管理元              |
-| ------------------------------------------- | -------------------- |
-| NixOSサービス・ユーザー・システムパッケージ | `configuration.nix`  |
-| WSLのユーザーパッケージ・Zsh・mise          | Home Manager         |
-| Windows PowerShell設定                      | chezmoi              |
-| Windows Terminal設定                        | chezmoi              |
-| Windows VS Code設定                         | chezmoi              |
-| Windowsアプリ                               | wingetスクリプト     |
-| NixOS-WSLの導入                             | bootstrapスクリプト  |
-| 操作コマンド                                | miseタスク           |
+| ------------------------------------------- | ------------------- |
+| NixOSサービス・ユーザー・システムパッケージ | `configuration.nix` |
+| WSLのユーザーパッケージ・Zsh・mise          | Home Manager        |
+| Windows PowerShell設定                      | chezmoi             |
+| Windows Terminal設定                        | chezmoi             |
+| Windows VS Code設定                         | chezmoi             |
+| Windowsアプリ                               | wingetスクリプト    |
+| NixOS-WSLの導入                             | bootstrapスクリプト |
+| 操作コマンド                                | miseタスク          |
 
 同じファイルをHome Managerとchezmoiの双方で管理しないこと（`.chezmoiignore`でOSごとに切り替える）。
 
