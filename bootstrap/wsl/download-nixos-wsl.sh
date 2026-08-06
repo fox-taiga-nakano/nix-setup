@@ -6,7 +6,8 @@ ASSET_NAME="nixos.wsl"
 DOWNLOAD_URL="https://github.com/${REPO}/releases/latest/download/${ASSET_NAME}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_OUTPUT_DIR="${SCRIPT_DIR}/assets"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+DEFAULT_OUTPUT_DIR="${REPO_ROOT}/assets"
 OUTPUT_DIR="${1:-${DEFAULT_OUTPUT_DIR}}"
 OUTPUT_FILE="${OUTPUT_DIR}/${ASSET_NAME}"
 
